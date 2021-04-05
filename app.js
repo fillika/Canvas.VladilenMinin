@@ -4,8 +4,8 @@ class Sizes {
   constructor() {
     this.width = 600;
     this.height = 200;
-    this.dpi = 3;
-    this.padding = 40;
+    this.dpi = 2;
+    this.padding = 20 * this.dpi;
     this.totalWidth = this.width * this.dpi;
     this.totalHeight = this.height * this.dpi;
     this.viewHeight = this.totalHeight - this.padding * 2;
@@ -23,6 +23,8 @@ class Sizes {
 
   parseData(data) {
     const { columns, types, colors } = data;
+
+    console.log(data);
 
     columns.forEach((cordsArray) => {
       const [type, ...rest] = cordsArray;
@@ -129,8 +131,8 @@ function drawYAxis(ctx) {
 }
 
 function drawXAxis(ctx) {
-  const colsCount = 5;
-  const step = Math.round(SIZES.xLine.length / 5);
+  const colsCount = 7;
+  const step = Math.round(SIZES.xLine.length / colsCount);
 
   // -----
   ctx.beginPath();
@@ -138,10 +140,10 @@ function drawXAxis(ctx) {
   ctx.font = "normal 20px Helvetica, sans-serif";
   ctx.fillStyle = "#96a2aa";
 
-  for (let index = 1; index <  SIZES.xLine.length; index+= step) {
-    const xValue =  SIZES.xLine[index];
+  for (let index = 1; index < SIZES.xLine.length; index += step) {
+    const xValue = SIZES.xLine[index];
     const resultX = index * SIZES.xRatio;
-    ctx.fillText(new Date(xValue).toDateString(), resultX, SIZES.totalHeight - 5);
+    ctx.fillText(toDate(xValue), resultX, SIZES.totalHeight - 5);
   }
 
   ctx.stroke();
@@ -539,4 +541,26 @@ function getChartData() {
       },
     },
   ][0];
+}
+
+// TO DATE
+
+function toDate(timestamp) {
+  const shortMonth = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const date = new Date(timestamp);
+  return `${shortMonth[date.getMonth()]} ${date.getDate()}`;
 }
