@@ -4,7 +4,7 @@ class Sizes {
   constructor() {
     this.width = 600;
     this.height = 200;
-    this.dpi = 2;
+    this.dpi = 3;
     this.padding = 40;
     this.totalWidth = this.width * this.dpi;
     this.totalHeight = this.height * this.dpi;
@@ -79,6 +79,9 @@ function chart(canvas, data) {
   // === y axis
   drawYAxis(ctx);
 
+  // === x axis
+  drawXAxis(ctx);
+
   // MainLine
   SIZES.yLines.forEach((yLineData) => {
     drawLine(ctx, yLineData);
@@ -125,6 +128,26 @@ function drawYAxis(ctx) {
   ctx.closePath();
 }
 
+function drawXAxis(ctx) {
+  const colsCount = 5;
+  const step = Math.round(SIZES.xLine.length / 5);
+
+  // -----
+  ctx.beginPath();
+  ctx.strokeStyle = "#bbb";
+  ctx.font = "normal 20px Helvetica, sans-serif";
+  ctx.fillStyle = "#96a2aa";
+
+  for (let index = 1; index <  SIZES.xLine.length; index+= step) {
+    const xValue =  SIZES.xLine[index];
+    const resultX = index * SIZES.xRatio;
+    ctx.fillText(new Date(xValue).toDateString(), resultX, SIZES.totalHeight - 5);
+  }
+
+  ctx.stroke();
+  ctx.closePath();
+}
+
 function drawLine(ctx, data) {
   const { coords, color } = data;
 
@@ -139,7 +162,6 @@ function drawLine(ctx, data) {
     // const resultX = `${new Date(x).getDay()}.${new Date(x).getMonth()}.${new Date(x).getFullYear()}`;
     const resultX = Math.round(j * SIZES.xRatio);
     const resultY = Math.round(yHighCoord - y * SIZES.yRatio);
-    console.log([resultX, resultY]);
     /**
      * У canvas отчет идет с верхнего левого угла.
      * Вычитая, Я как бы меняю систему координат, начиная отсчитывать точку снизу слева, как "правильнее".
