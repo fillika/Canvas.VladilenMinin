@@ -9,6 +9,7 @@ class Sizes {
     this.totalWidth = this.width * this.dpi;
     this.totalHeight = this.height * this.dpi;
     this.viewHeight = this.totalHeight - this.padding * 2;
+    this.viewWidth = this.totalWidth;
     this.rowCount = 5;
     this.step = this.viewHeight / this.rowCount;
     this.yLines = [];
@@ -17,6 +18,7 @@ class Sizes {
     this.yMax;
     this.yAxisStep; // Шаг по оси Y
     this.yRatio;
+    this.xRatio;
   }
 
   parseData(data) {
@@ -55,6 +57,7 @@ class Sizes {
     const diff = this.yMax - this.yMin;
     this.yAxisStep = diff / this.rowCount;
     this.yRatio = this.viewHeight / diff;
+    this.xRatio = this.viewWidth / (this.xLine.length - 2);
   }
 }
 
@@ -68,8 +71,8 @@ const SIZES = new Sizes();
 function chart(canvas, data) {
   const ctx = canvas.getContext("2d");
   SIZES.parseData(data);
-
   console.log(SIZES);
+
   // Styles
   setStyles(canvas, SIZES);
 
@@ -133,11 +136,15 @@ function drawLine(ctx, data) {
   for (let j = 0; j < coords.length; j++) {
     const y = coords[j];
     const x = SIZES.xLine[j];
+    // const resultX = `${new Date(x).getDay()}.${new Date(x).getMonth()}.${new Date(x).getFullYear()}`;
+    const resultX = Math.round(j * SIZES.xRatio);
+    const resultY = Math.round(yHighCoord - y * SIZES.yRatio);
+    console.log([resultX, resultY]);
     /**
      * У canvas отчет идет с верхнего левого угла.
      * Вычитая, Я как бы меняю систему координат, начиная отсчитывать точку снизу слева, как "правильнее".
      */
-    ctx.lineTo(x, yHighCoord - y * SIZES.yRatio);
+    ctx.lineTo(resultX, resultY);
   }
 
   ctx.stroke();
