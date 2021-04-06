@@ -37,6 +37,7 @@ function isCurrentPosition(mouseCoords, x) {
  * @param {Number} dpi
  */
 function setStyles(canvas, sizes) {
+  // TODO Добавить resize
   const { width, height, totalWidth, totalHeight } = sizes;
   canvas.style.width = width + "px";
   canvas.style.height = height + "px";
@@ -44,4 +45,8 @@ function setStyles(canvas, sizes) {
   canvas.height = totalHeight;
 }
 
-export { toDate, isCurrentPosition,  setStyles};
+function css(el, styles) {
+  Object.assign(el.style, styles);
+}
+
+export { toDate, isCurrentPosition, setStyles, css };

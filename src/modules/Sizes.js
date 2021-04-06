@@ -1,5 +1,8 @@
+import { canvas } from "./Canvas";
+
 class Sizes {
   constructor() {
+    // this.width = canvas.canvas.parentElement.getBoundingClientRect().width * 0.95;
     this.width = 600;
     this.height = 200;
     this.dpi = 2;
@@ -90,5 +93,4 @@ class Sizes {
 
 const SIZES = new Sizes();
 
-
-export {SIZES};
+export { SIZES };

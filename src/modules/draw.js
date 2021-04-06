@@ -1,6 +1,7 @@
 import { SIZES } from "./Sizes";
 import { proxy } from "./Proxy";
 import { toDate, isCurrentPosition } from "./utils";
+import { template } from "../tooltip";
 
 function drawYAxis(ctx) {
   ctx.beginPath();
