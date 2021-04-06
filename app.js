@@ -13,6 +13,7 @@ class Sizes {
     this.rowCount = 5;
     this.step = this.viewHeight / this.rowCount;
     this.yLines = [];
+    this.yLinesCoords = [];
     this.xLine;
     this.yMin;
     this.yMax;
@@ -43,6 +44,8 @@ class Sizes {
         coords: rest,
         color: colors[type],
       });
+
+      this.createyLinesCoordArray(rest, colors[type]);
     });
   }
 
@@ -60,6 +63,30 @@ class Sizes {
     this.yAxisStep = diff / this.rowCount;
     this.yRatio = this.viewHeight / diff;
     this.xRatio = this.viewWidth / (this.xLine.length - 2);
+  }
+
+  // Создаем массив координат
+  createyLinesCoordArray(array, color) {
+    const yHighCoord = SIZES.totalHeight - SIZES.padding; // Самая высокая точка Y за вычетом паддинга
+    const resultArray = [];
+
+    for (let j = 0; j < array.length; j++) {
+      const y = array[j];
+
+      // const resultX = `${new Date(x).getDay()}.${new Date(x).getMonth()}.${new Date(x).getFullYear()}`;
+      const resultX = Math.round(j * SIZES.xRatio);
+      const resultY = Math.round(yHighCoord - y * SIZES.yRatio);
+      /**
+       * У canvas отчет идет с верхнего левого угла.
+       * Вычитая, Я как бы меняю систему координат, начиная отсчитывать точку снизу слева, как "правильнее".
+       */
+      resultArray.push([resultX, resultY]);
+    }
+
+    this.yLinesCoords.push({
+      color: color,
+      coords: resultArray,
+    });
   }
 }
 
@@ -102,11 +129,13 @@ function chart({ canvas, ctx }, data) {
   draw(ctx);
   // addListener
   canvas.addEventListener("mousemove", mousemove);
+  canvas.addEventListener("mouseleave", mouseleave);
 
   return {
     destroy() {
       cancelAnimationFrame(reqAnFrame);
       canvas.removeEventListener("mousemove", mousemove);
+      canvas.removeEventListener("mouseleave", mouseleave);
     },
   };
 }
@@ -161,39 +190,36 @@ function drawXAxis(ctx, proxy) {
   ctx.font = "normal 20px Helvetica, sans-serif";
   ctx.fillStyle = "#96a2aa";
 
-  for (let index = 1; index < SIZES.xLine.length; index++) {
-    if ((index - 1) % step === 0) {
-      const xValue = SIZES.xLine[index];
-      const resultX = index * SIZES.xRatio;
-      ctx.fillText(toDate(xValue), resultX, SIZES.totalHeight - 5);
+  for (let index = 0; index < SIZES.xLine.length; index++) {
+    const xValue = SIZES.xLine[index];
+    const date = toDate(xValue);
+    const resultX = index * SIZES.xRatio;
+
+    if (index % step === 0) {
+      ctx.fillText(date, resultX, SIZES.totalHeight - 5);
+    }
+
+    if (isCurrentPosition(mouseCoords, resultX)) {
+      // TODO Здесь формируем tooltip
+      // Выводим date
+      // SIZES.yLines.forEach(line => console.log(line.coords[index])) // Получаем данные по каждой линии
+      drawVerticalLine(ctx, mouseCoords);
     }
   }
 
   ctx.stroke();
   ctx.closePath();
   // -----
-  drawVerticalLine(ctx, mouseCoords);
 }
 
-function drawDataLines(ctx, data) {
-  const { coords, color } = data;
-
-  const yHighCoord = SIZES.totalHeight - SIZES.padding; // Самая высокая точка Y за вычетом паддинга
+function drawDataLines(ctx, { coords, color }) {
   ctx.beginPath();
   ctx.lineWidth = 4;
   ctx.strokeStyle = color;
 
   for (let j = 0; j < coords.length; j++) {
-    const y = coords[j];
-    const x = SIZES.xLine[j];
-    // const resultX = `${new Date(x).getDay()}.${new Date(x).getMonth()}.${new Date(x).getFullYear()}`;
-    const resultX = Math.round(j * SIZES.xRatio);
-    const resultY = Math.round(yHighCoord - y * SIZES.yRatio);
-    /**
-     * У canvas отчет идет с верхнего левого угла.
-     * Вычитая, Я как бы меняю систему координат, начиная отсчитывать точку снизу слева, как "правильнее".
-     */
-    ctx.lineTo(resultX, resultY);
+    const [x, y] = coords[j];
+    ctx.lineTo(x, y);
   }
 
   ctx.stroke();
@@ -202,14 +228,30 @@ function drawDataLines(ctx, data) {
 
 function drawVerticalLine(ctx, coords) {
   if (coords === undefined) return;
-  
-  const xCoord = coords.x * SIZES.dpi;
 
+  const lineWidth = 2;
+  const xCoord = coords.x + lineWidth;
+  ctx.save();
+
+  ctx.lineWidth = lineWidth;
+  ctx.lineTo(xCoord, SIZES.padding / 2);
+  ctx.lineTo(xCoord, SIZES.totalHeight - SIZES.padding);
+
+  ctx.restore();
+}
+
+function drawCircle(ctx, { coords, color }) {
+  const radius = 3 * SIZES.dpi;
   ctx.beginPath();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#bbb";
-  ctx.lineTo(xCoord, 0);
-  ctx.lineTo(xCoord, SIZES.totalWidth);
+  ctx.lineWidth = 1.5 * SIZES.dpi;
+  ctx.strokeStyle = color;
+
+  coords.forEach(([x, y]) => {
+    if (isCurrentPosition(proxy.mouseCoords, x)) {
+      ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+    }
+  });
+
   ctx.stroke();
   ctx.closePath();
 }
@@ -613,9 +655,10 @@ function draw(ctx) {
   // === x axis
   drawXAxis(ctx, proxy);
 
-  // MainLine
-  SIZES.yLines.forEach((yLineData) => {
-    drawDataLines(ctx, yLineData);
+  // MainLines and circles
+  SIZES.yLinesCoords.forEach((coordsArr) => {
+    drawDataLines(ctx, coordsArr);
+    drawCircle(ctx, coordsArr);
   });
 }
 
@@ -626,6 +669,21 @@ function clearCanvas(ctx) {
 // listener function
 function mousemove({ offsetX, offsetY }) {
   proxy.mouseCoords = {
-    x: offsetX,
+    x: offsetX * SIZES.dpi,
   };
+}
+
+function mouseleave() {
+  proxy.mouseCoords = undefined;
+}
+
+/**
+ * Метод, который определяет, находится ли курсор мыши на определенных координатах
+ */
+function isCurrentPosition(mouseCoords, x) {
+  if (mouseCoords === undefined) return;
+
+  const itemWidth = SIZES.totalWidth / SIZES.xLine.length; // длина 1 отрезка
+  const result = Math.abs(x - mouseCoords.x) < itemWidth / 2;
+  return result;
 }
