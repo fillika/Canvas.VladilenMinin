@@ -1,5 +1,3 @@
-// import { setStyles, SIZES } from "./src/utils";
-
 class Sizes {
   constructor() {
     this.width = 600;
@@ -41,7 +39,7 @@ class Sizes {
       this.computeBoundaries(rest);
 
       this.yLines.push({
-        coords: rest,
+        value: rest,
         color: colors[type],
       });
 
@@ -243,14 +241,16 @@ function drawVerticalLine(ctx, coords) {
 function drawCircle(ctx, { coords, color }) {
   const radius = 3 * SIZES.dpi;
   ctx.beginPath();
-  ctx.lineWidth = 1.5 * SIZES.dpi;
+  ctx.lineWidth = 2 * SIZES.dpi;
   ctx.strokeStyle = color;
 
-  coords.forEach(([x, y]) => {
+  for (let k = 0; k < coords.length; k++) {
+    const [x, y] = coords[k];
     if (isCurrentPosition(proxy.mouseCoords, x)) {
       ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+      break; // Чтобы не рисовалось 2 кружков, которые рядом
     }
-  });
+  }
 
   ctx.stroke();
   ctx.closePath();
@@ -667,7 +667,7 @@ function clearCanvas(ctx) {
 }
 
 // listener function
-function mousemove({ offsetX, offsetY }) {
+function mousemove({ offsetX }) {
   proxy.mouseCoords = {
     x: offsetX * SIZES.dpi,
   };
