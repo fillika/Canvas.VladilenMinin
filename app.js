@@ -73,6 +73,17 @@ class Canvas {
 const SIZES = new Sizes();
 const canvas = new Canvas("chart");
 let reqAnFrame;
+// Proxy
+const proxy = new Proxy(
+  {},
+  {
+    set(...args) {
+      const result = Reflect.set(...args);
+      reqAnFrame = requestAnimationFrame(() => draw(canvas.ctx));
+      return result;
+    },
+  }
+);
 
 chart(canvas, getChartData());
 
@@ -119,6 +130,7 @@ function drawYAxis(ctx) {
   ctx.strokeStyle = "#bbb";
   ctx.font = "normal 20px Helvetica, sans-serif";
   ctx.fillStyle = "#96a2aa";
+  ctx.lineWidth = 1;
 
   for (let index = 1; index <= SIZES.rowCount; index++) {
     const yWithoutPadding = SIZES.step * index; // Тут считаем значение
@@ -138,7 +150,8 @@ function drawYAxis(ctx) {
   ctx.closePath();
 }
 
-function drawXAxis(ctx) {
+function drawXAxis(ctx, proxy) {
+  const { mouseCoords } = proxy;
   const colsCount = 7;
   const step = Math.round(SIZES.xLine.length / colsCount);
 
@@ -148,17 +161,21 @@ function drawXAxis(ctx) {
   ctx.font = "normal 20px Helvetica, sans-serif";
   ctx.fillStyle = "#96a2aa";
 
-  for (let index = 1; index < SIZES.xLine.length; index += step) {
-    const xValue = SIZES.xLine[index];
-    const resultX = index * SIZES.xRatio;
-    ctx.fillText(toDate(xValue), resultX, SIZES.totalHeight - 5);
+  for (let index = 1; index < SIZES.xLine.length; index++) {
+    if ((index - 1) % step === 0) {
+      const xValue = SIZES.xLine[index];
+      const resultX = index * SIZES.xRatio;
+      ctx.fillText(toDate(xValue), resultX, SIZES.totalHeight - 5);
+    }
   }
 
   ctx.stroke();
   ctx.closePath();
+  // -----
+  drawVerticalLine(ctx, mouseCoords);
 }
 
-function drawLine(ctx, data) {
+function drawDataLines(ctx, data) {
   const { coords, color } = data;
 
   const yHighCoord = SIZES.totalHeight - SIZES.padding; // Самая высокая точка Y за вычетом паддинга
@@ -179,6 +196,20 @@ function drawLine(ctx, data) {
     ctx.lineTo(resultX, resultY);
   }
 
+  ctx.stroke();
+  ctx.closePath();
+}
+
+function drawVerticalLine(ctx, coords) {
+  if (coords === undefined) return;
+  
+  const xCoord = coords.x * SIZES.dpi;
+
+  ctx.beginPath();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#bbb";
+  ctx.lineTo(xCoord, 0);
+  ctx.lineTo(xCoord, SIZES.totalWidth);
   ctx.stroke();
   ctx.closePath();
 }
@@ -575,15 +606,16 @@ function toDate(timestamp) {
 // main draw function
 function draw(ctx) {
   clearCanvas(ctx);
+
   // === y axis
   drawYAxis(ctx);
 
   // === x axis
-  drawXAxis(ctx);
+  drawXAxis(ctx, proxy);
 
   // MainLine
   SIZES.yLines.forEach((yLineData) => {
-    drawLine(ctx, yLineData);
+    drawDataLines(ctx, yLineData);
   });
 }
 
@@ -591,22 +623,9 @@ function clearCanvas(ctx) {
   ctx.clearRect(0, 0, SIZES.totalWidth, SIZES.totalHeight);
 }
 
-// Proxy
-const proxy = new Proxy(
-  {},
-  {
-    set(...args) {
-      const result = Reflect.set(...args);
-      reqAnFrame = requestAnimationFrame(() => draw(canvas.ctx));
-      console.log("change");
-      return result;
-    },
-  }
-);
-
 // listener function
 function mousemove({ offsetX, offsetY }) {
-  proxy.mouse = {
+  proxy.mouseCoords = {
     x: offsetX,
   };
 }
