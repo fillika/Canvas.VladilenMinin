@@ -63,34 +63,42 @@ class Sizes {
   }
 }
 
+class Canvas {
+  constructor(id) {
+    this.canvas = document.getElementById(id);
+    this.ctx = this.canvas.getContext("2d");
+  }
+}
+
 const SIZES = new Sizes();
+const canvas = new Canvas("chart");
+let reqAnFrame;
+
+chart(canvas, getChartData());
 
 /**
  * Основная функция инициализации Canvas
  * @param {HTMLCanvasElement} canvas
  * @param {Array[]} data
  */
-function chart(canvas, data) {
-  const ctx = canvas.getContext("2d");
+function chart({ canvas, ctx }, data) {
   SIZES.parseData(data);
   console.log(SIZES);
 
   // Styles
   setStyles(canvas, SIZES);
+  // draw
+  draw(ctx);
+  // addListener
+  canvas.addEventListener("mousemove", mousemove);
 
-  // === y axis
-  drawYAxis(ctx);
-
-  // === x axis
-  drawXAxis(ctx);
-
-  // MainLine
-  SIZES.yLines.forEach((yLineData) => {
-    drawLine(ctx, yLineData);
-  });
+  return {
+    destroy() {
+      cancelAnimationFrame(reqAnFrame);
+      canvas.removeEventListener("mousemove", mousemove);
+    },
+  };
 }
-
-chart(document.getElementById("chart"), getChartData());
 
 /** Utils */
 /**
@@ -544,7 +552,6 @@ function getChartData() {
 }
 
 // TO DATE
-
 function toDate(timestamp) {
   const shortMonth = [
     "Jan",
@@ -563,4 +570,43 @@ function toDate(timestamp) {
 
   const date = new Date(timestamp);
   return `${shortMonth[date.getMonth()]} ${date.getDate()}`;
+}
+
+// main draw function
+function draw(ctx) {
+  clearCanvas(ctx);
+  // === y axis
+  drawYAxis(ctx);
+
+  // === x axis
+  drawXAxis(ctx);
+
+  // MainLine
+  SIZES.yLines.forEach((yLineData) => {
+    drawLine(ctx, yLineData);
+  });
+}
+
+function clearCanvas(ctx) {
+  ctx.clearRect(0, 0, SIZES.totalWidth, SIZES.totalHeight);
+}
+
+// Proxy
+const proxy = new Proxy(
+  {},
+  {
+    set(...args) {
+      const result = Reflect.set(...args);
+      reqAnFrame = requestAnimationFrame(() => draw(canvas.ctx));
+      console.log("change");
+      return result;
+    },
+  }
+);
+
+// listener function
+function mousemove({ offsetX, offsetY }) {
+  proxy.mouse = {
+    x: offsetX,
+  };
 }
