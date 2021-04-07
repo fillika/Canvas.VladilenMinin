@@ -56,9 +56,11 @@ function css(el, styles) {
  */
 function textWithMaxLenght(textArr) {
   let maxLenghtText = "";
-  textArr.forEach((str) =>
-    str.length > maxLenghtText.length ? (maxLenghtText = str) : false
-  );
+  textArr.forEach((data) => {
+    data.text.toString().length > maxLenghtText.length
+      ? (maxLenghtText = data.text.toString())
+      : false;
+  });
   return maxLenghtText;
 }
 export { toDate, isCurrentPosition, setStyles, css, textWithMaxLenght };

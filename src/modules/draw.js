@@ -108,20 +108,29 @@ function drawCircle(ctx, { coords, color }) {
 
 // tooltip
 // TODO Текст должен быть массивом строк
-function drawTooltip(ctx, text, startX1, startY, angle) {
-  const textHeight = 14;
-  const height = textHeight + text.length * textHeight;
+function drawTooltip(ctx, textArr, startX, angle) {
+  const style = {
+    fontSize: 12 * SIZES.dpi,
+    lineHeight: 12 * SIZES.dpi,
+    color: "rgb(40, 44, 53)",
+    backgroundColor: "#fff",
+    lineWidth: 1 * SIZES.dpi,
+    padding: 10,
+  };
+
+  const height = style.lineHeight + textArr.length * style.lineHeight;
+  const startY = SIZES.totalHeight / 2 - height;
 
   ctx.beginPath();
-  ctx.font = `normal ${textHeight}px Helvetica, sans-serif`;
+  ctx.font = `normal ${style.lineHeight}px sans-serif`;
+
   const width =
-    Math.round(ctx.measureText(textWithMaxLenght(text)).width) + textHeight;
+    Math.round(ctx.measureText(textWithMaxLenght(textArr)).width) +
+    style.padding * 2;
 
-  const startX = SIZES.totalWidth - width;
-
-  ctx.strokeStyle = "#333";
-  ctx.lineWidth = 2;
-  ctx.fillStyle = "rgba(40, 44, 53, 0.41)";
+  ctx.strokeStyle = style.color;
+  ctx.lineWidth = style.lineWidth;
+  ctx.fillStyle = style.backgroundColor;
   ctx.moveTo(startX + angle, startY);
   ctx.arcTo(startX + width, startY, startX + width, startY + height, angle);
   ctx.arcTo(startX + width, startY + height, startX, startY + height, angle);
@@ -129,13 +138,14 @@ function drawTooltip(ctx, text, startX1, startY, angle) {
   ctx.arcTo(startX, startY, startX + width, startY, angle);
   ctx.fill();
   // text styles and draw
-  ctx.fillStyle = "red";
-  for (let j = 0; j < text.length; j++) {
-    const element = text[j];
+  for (let j = 0; j < textArr.length; j++) {
+    ctx.fillStyle = textArr[j].color;
+    const element = textArr[j].text;
+
     ctx.fillText(
       element,
-      startX + angle / 2,
-      startY + textHeight * 1.3 + textHeight * j
+      startX + style.padding,
+      startY + style.lineHeight + style.padding + style.lineHeight * j
     );
   }
   ctx.stroke();
@@ -163,20 +173,23 @@ function draw(ctx) {
 
 function isDrawTooltip(ctx, proxy) {
   const { mouseCoords } = proxy;
+  const text = [];
 
   for (let index = 0; index < SIZES.xLine.length; index++) {
     const resultX = index * SIZES.xRatio;
 
     if (isCurrentPosition(mouseCoords, resultX)) {
+      SIZES.yLines.forEach((line) => {
+        text.push({
+          text: line.value[index],
+          color: line.color,
+        });
+      });
+
       drawTooltip(
         ctx,
-        [
-          "Some text, more and more text",
-          "Second text for example? Olololololol",
-          "Third text for you",
-        ],
-        mouseCoords.x, // Пока что координата не работает
-        25,
+        text,
+        mouseCoords.x + 30, // Пока что координата не работает
         10
       );
     }
