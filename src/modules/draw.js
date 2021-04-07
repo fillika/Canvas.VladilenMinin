@@ -118,6 +118,8 @@ function drawTooltip(ctx, textArr, startX, angle) {
     padding: 10,
   };
 
+  let xCoord = startX + style.padding * 2;
+
   const height = style.lineHeight + textArr.length * style.lineHeight;
   const startY = SIZES.totalHeight / 2 - height;
 
@@ -128,14 +130,19 @@ function drawTooltip(ctx, textArr, startX, angle) {
     Math.round(ctx.measureText(textWithMaxLenght(textArr)).width) +
     style.padding * 2;
 
+  // Понять, уходит ли tooltip за границы canvas
+  if (SIZES.totalWidth - xCoord < width) {
+    xCoord = xCoord - width - style.padding * 4;
+  }
+
   ctx.strokeStyle = style.color;
   ctx.lineWidth = style.lineWidth;
   ctx.fillStyle = style.backgroundColor;
-  ctx.moveTo(startX + angle, startY);
-  ctx.arcTo(startX + width, startY, startX + width, startY + height, angle);
-  ctx.arcTo(startX + width, startY + height, startX, startY + height, angle);
-  ctx.arcTo(startX, startY + height, startX, startY, angle);
-  ctx.arcTo(startX, startY, startX + width, startY, angle);
+  ctx.moveTo(xCoord + angle, startY);
+  ctx.arcTo(xCoord + width, startY, xCoord + width, startY + height, angle);
+  ctx.arcTo(xCoord + width, startY + height, xCoord, startY + height, angle);
+  ctx.arcTo(xCoord, startY + height, xCoord, startY, angle);
+  ctx.arcTo(xCoord, startY, xCoord + width, startY, angle);
   ctx.fill();
   // text styles and draw
   for (let j = 0; j < textArr.length; j++) {
@@ -144,7 +151,7 @@ function drawTooltip(ctx, textArr, startX, angle) {
 
     ctx.fillText(
       element,
-      startX + style.padding,
+      xCoord + style.padding,
       startY + style.lineHeight + style.padding + style.lineHeight * j
     );
   }
@@ -189,7 +196,7 @@ function isDrawTooltip(ctx, proxy) {
       drawTooltip(
         ctx,
         text,
-        mouseCoords.x + 30, // Пока что координата не работает
+        mouseCoords.x, // Пока что координата не работает
         10
       );
     }
