@@ -1,7 +1,6 @@
 import { SIZES } from "./Sizes";
 import { proxy } from "./Proxy";
 import { toDate, isCurrentPosition, textWithMaxLenght } from "./utils";
-import { template } from "../tooltip";
 
 function drawYAxis(ctx) {
   ctx.beginPath();
@@ -115,7 +114,8 @@ function drawTooltip(ctx, text, startX, startY, angle) {
 
   ctx.beginPath();
   ctx.font = `normal ${textHeight}px Helvetica, sans-serif`;
-  const width = Math.round(ctx.measureText(textWithMaxLenght(text)).width) + textHeight;
+  const width =
+    Math.round(ctx.measureText(textWithMaxLenght(text)).width) + textHeight;
 
   ctx.strokeStyle = "#333";
   ctx.lineWidth = 2;
@@ -130,7 +130,11 @@ function drawTooltip(ctx, text, startX, startY, angle) {
   ctx.fillStyle = "red";
   for (let j = 0; j < text.length; j++) {
     const element = text[j];
-    ctx.fillText(element, startX + angle / 2, startY + textHeight * 1.3 + textHeight * j);
+    ctx.fillText(
+      element,
+      startX + angle / 2,
+      startY + textHeight * 1.3 + textHeight * j
+    );
   }
   ctx.stroke();
   ctx.closePath();
@@ -152,17 +156,29 @@ function draw(ctx) {
     drawCircle(ctx, coordsArr);
   });
 
-  drawTooltip(
-    ctx,
-    [
-      "Some text, more and more text",
-      "Second text for example? Olololololol",
-      "Third text for you",
-    ],
-    200,
-    25,
-    10
-  );
+  isDrawTooltip(ctx, proxy);
+}
+
+function isDrawTooltip(ctx, proxy) {
+  const {mouseCoords} = proxy;
+
+  for (let index = 0; index < SIZES.xLine.length; index++) {
+    const resultX = index * SIZES.xRatio;
+
+    if (isCurrentPosition(mouseCoords, resultX)) {
+      drawTooltip(
+        ctx,
+        [
+          "Some text, more and more text",
+          "Second text for example? Olololololol",
+          "Third text for you",
+        ],
+        mouseCoords.x,
+        25,
+        10
+      );
+    }
+  }
 }
 
 function clearCanvas(ctx) {
