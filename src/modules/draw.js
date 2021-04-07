@@ -60,9 +60,9 @@ function drawXAxis(ctx, proxy) {
   // -----
 }
 
-function drawDataLines(ctx, { coords, color }) {
+function drawDataLines(ctx, { coords, color, lineWidth }) {
   ctx.beginPath();
-  ctx.lineWidth = 4;
+  ctx.lineWidth = lineWidth;
   ctx.strokeStyle = color;
 
   for (let j = 0; j < coords.length; j++) {

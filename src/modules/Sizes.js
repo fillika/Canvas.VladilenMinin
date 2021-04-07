@@ -1,11 +1,3 @@
-import { canvas } from "./Canvas";
-
-const params = {
-  width: 600,
-  height: 200,
-  padding: 20,
-  rowCount: 5,
-};
 class Sizes {
   constructor(params) {
     // this.width = canvas.canvas.parentElement.getBoundingClientRect().width * 0.95;
@@ -18,6 +10,7 @@ class Sizes {
     this.viewHeight = this.totalHeight - this.padding * 2;
     this.viewWidth = this.totalWidth;
     this.rowCount = params.rowCount;
+    this.lineWidth = params.lineWidth;
     this.step = this.viewHeight / this.rowCount;
     this.yLines = [];
     this.yLinesCoords = [];
@@ -31,8 +24,6 @@ class Sizes {
 
   parseData(data) {
     const { columns, types, colors } = data;
-
-    console.log(data);
 
     columns.forEach((cordsArray) => {
       const [type, ...rest] = cordsArray;
@@ -92,6 +83,7 @@ class Sizes {
     this.yLinesCoords.push({
       color: color,
       coords: resultArray,
+      lineWidth: this.lineWidth
     });
   }
 }
@@ -101,12 +93,15 @@ const mainCanvas = new Sizes({
   height: 200,
   padding: 20,
   rowCount: 5,
+  lineWidth: 4,
 });
+
 const sliderCanvas = new Sizes({
   width: 600,
   height: 50,
   padding: 5,
   rowCount: 0,
+  lineWidth: 2,
 });
 
 export { mainCanvas as SIZES, sliderCanvas as SIZES_SLIDER };

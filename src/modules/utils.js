@@ -64,4 +64,26 @@ function textWithMaxLenght(textArr) {
   });
   return maxLenghtText;
 }
-export { toDate, isCurrentPosition, setStyles, css, textWithMaxLenght };
+
+function setPosition({ left, window, right }, rightPos) {
+  const w = 150;
+  // Меняем позицию элементов в слайдере
+  css(left, {
+    right: `${rightPos + w}px`,
+  });
+  css(window, {
+    width: `${w}px`,
+    right: `${rightPos}px`,
+  });
+  css(right, {
+    width: `${rightPos}px`,
+  });
+}
+export {
+  toDate,
+  isCurrentPosition,
+  setStyles,
+  css,
+  textWithMaxLenght,
+  setPosition,
+};
