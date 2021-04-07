@@ -1,6 +1,6 @@
 import { SIZES } from "./Sizes";
 import { proxy } from "./Proxy";
-import { toDate, isCurrentPosition } from "./utils";
+import { toDate, isCurrentPosition, textWithMaxLenght } from "./utils";
 import { template } from "../tooltip";
 
 function drawYAxis(ctx) {
@@ -107,6 +107,35 @@ function drawCircle(ctx, { coords, color }) {
   ctx.closePath();
 }
 
+// tooltip
+// TODO Текст должен быть массивом строк
+function drawTooltip(ctx, text, startX, startY, angle) {
+  const textHeight = 14;
+  const height = textHeight + text.length * textHeight;
+
+  ctx.beginPath();
+  ctx.font = `normal ${textHeight}px Helvetica, sans-serif`;
+  const width = Math.round(ctx.measureText(textWithMaxLenght(text)).width) + textHeight;
+
+  ctx.strokeStyle = "#333";
+  ctx.lineWidth = 2;
+  ctx.fillStyle = "rgba(40, 44, 53, 0.41)";
+  ctx.moveTo(startX + angle, startY);
+  ctx.arcTo(startX + width, startY, startX + width, startY + height, angle);
+  ctx.arcTo(startX + width, startY + height, startX, startY + height, angle);
+  ctx.arcTo(startX, startY + height, startX, startY, angle);
+  ctx.arcTo(startX, startY, startX + width, startY, angle);
+  ctx.fill();
+  // text styles and draw
+  ctx.fillStyle = "red";
+  for (let j = 0; j < text.length; j++) {
+    const element = text[j];
+    ctx.fillText(element, startX + angle / 2, startY + textHeight * 1.3 + textHeight * j);
+  }
+  ctx.stroke();
+  ctx.closePath();
+}
+
 // main draw function
 function draw(ctx) {
   clearCanvas(ctx);
@@ -122,6 +151,18 @@ function draw(ctx) {
     drawDataLines(ctx, coordsArr);
     drawCircle(ctx, coordsArr);
   });
+
+  drawTooltip(
+    ctx,
+    [
+      "Some text, more and more text",
+      "Second text for example? Olololololol",
+      "Third text for you",
+    ],
+    200,
+    25,
+    10
+  );
 }
 
 function clearCanvas(ctx) {

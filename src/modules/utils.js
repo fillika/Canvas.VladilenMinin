@@ -49,4 +49,16 @@ function css(el, styles) {
   Object.assign(el.style, styles);
 }
 
-export { toDate, isCurrentPosition, setStyles, css };
+/**
+ * Функция поиска максимального размера длины строки
+ * @param {Array} textArr - массив строк для tooltip
+ * @returns {string}
+ */
+function textWithMaxLenght(textArr) {
+  let maxLenghtText = "";
+  textArr.forEach((str) =>
+    str.length > maxLenghtText.length ? (maxLenghtText = str) : false
+  );
+  return maxLenghtText;
+}
+export { toDate, isCurrentPosition, setStyles, css, textWithMaxLenght };
