@@ -10,7 +10,19 @@
 <body>
     <div class="container">
         <div class="card">
-            <canvas id="chart"></canvas>
+            <div class="tg-chart">
+                <canvas data-el="main" id="chart"></canvas>
+
+                <div class="tg-chart-slider" data-el="slider">
+                    <canvas id="slider-chart"></canvas>
+
+                    <div data-el="left" class="tg-chart-slider__left">
+                        <div class="tg-chart-slider__arrow--left" data-el="arrow" data-type="left"></div>
+                        <div class="tg-chart-slider__window" data-el="window" data-type="window"></div>
+                        <div class="tg-chart-slider__arrow--right" data-el="arrow" data-type="rigth"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

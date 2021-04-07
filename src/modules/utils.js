@@ -39,6 +39,7 @@ function isCurrentPosition(mouseCoords, x) {
 function setStyles(canvas, sizes) {
   // TODO Добавить resize
   const { width, height, totalWidth, totalHeight } = sizes;
+
   canvas.style.width = width + "px";
   canvas.style.height = height + "px";
   canvas.width = totalWidth;

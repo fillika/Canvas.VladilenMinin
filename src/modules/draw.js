@@ -1,4 +1,4 @@
-import { SIZES } from "./Sizes";
+import { SIZES, SIZES_SLIDER } from "./Sizes";
 import { proxy } from "./Proxy";
 import { toDate, isCurrentPosition, textWithMaxLenght } from "./utils";
 
@@ -178,6 +178,16 @@ function draw(ctx) {
   isDrawTooltip(ctx, proxy);
 }
 
+function drawSliderChart(ctx) {
+  clearCanvas(ctx);
+
+  // MainLines and circles
+  SIZES_SLIDER.yLinesCoords.forEach((coordsArr) => {
+    drawDataLines(ctx, coordsArr);
+    drawCircle(ctx, coordsArr);
+  });
+}
+
 function isDrawTooltip(ctx, proxy) {
   const { mouseCoords } = proxy;
   const text = [];
@@ -214,5 +224,6 @@ export {
   drawVerticalLine,
   drawCircle,
   draw,
+  drawSliderChart,
   clearCanvas,
 };

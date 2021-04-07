@@ -1,13 +1,13 @@
 import "./styles.scss";
-import { canvas } from "./modules/Canvas";
-import { SIZES } from "./modules/Sizes";
+import { canvas, sliderCanvas } from "./modules/Canvas";
+import { SIZES, SIZES_SLIDER } from "./modules/Sizes";
 import { proxy } from "./modules/Proxy";
-import { draw } from "./modules/draw";
+import { draw, drawSliderChart } from "./modules/draw";
 import { setStyles } from "./modules/utils";
 import getChartData from "./data";
 
 chart(canvas, getChartData());
-
+sliderChart(sliderCanvas, getChartData())
 /**
  * Основная функция инициализации Canvas
  * @param {HTMLCanvasElement} canvas
@@ -32,6 +32,15 @@ function chart({ canvas, ctx }, data) {
       canvas.removeEventListener("mouseleave", mouseleave);
     },
   };
+}
+
+function sliderChart({ canvas, ctx }, data) {
+  SIZES_SLIDER.parseData(data);
+
+  // Styles
+  setStyles(canvas, SIZES_SLIDER);
+  // draw
+  drawSliderChart(ctx);
 }
 
 // listeners

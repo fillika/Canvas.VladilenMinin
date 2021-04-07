@@ -1,17 +1,23 @@
 import { canvas } from "./Canvas";
 
+const params = {
+  width: 600,
+  height: 200,
+  padding: 20,
+  rowCount: 5,
+};
 class Sizes {
-  constructor() {
+  constructor(params) {
     // this.width = canvas.canvas.parentElement.getBoundingClientRect().width * 0.95;
-    this.width = 600;
-    this.height = 200;
+    this.width = params.width;
+    this.height = params.height;
     this.dpi = 2;
-    this.padding = 20 * this.dpi;
+    this.padding = params.padding * this.dpi;
     this.totalWidth = this.width * this.dpi;
     this.totalHeight = this.height * this.dpi;
     this.viewHeight = this.totalHeight - this.padding * 2;
     this.viewWidth = this.totalWidth;
-    this.rowCount = 5;
+    this.rowCount = params.rowCount;
     this.step = this.viewHeight / this.rowCount;
     this.yLines = [];
     this.yLinesCoords = [];
@@ -74,7 +80,6 @@ class Sizes {
     for (let j = 0; j < array.length; j++) {
       const y = array[j];
 
-      // const resultX = `${new Date(x).getDay()}.${new Date(x).getMonth()}.${new Date(x).getFullYear()}`;
       const resultX = Math.round(j * this.xRatio);
       const resultY = Math.round(yHighCoord - y * this.yRatio);
       /**
@@ -91,6 +96,17 @@ class Sizes {
   }
 }
 
-const SIZES = new Sizes();
+const mainCanvas = new Sizes({
+  width: 600,
+  height: 200,
+  padding: 20,
+  rowCount: 5,
+});
+const sliderCanvas = new Sizes({
+  width: 600,
+  height: 50,
+  padding: 5,
+  rowCount: 0,
+});
 
-export { SIZES };
+export { mainCanvas as SIZES, sliderCanvas as SIZES_SLIDER };
