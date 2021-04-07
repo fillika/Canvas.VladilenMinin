@@ -36,6 +36,13 @@ function chart({ canvas, ctx }, data) {
 function sliderChart({ canvas, ctx }, data) {
   SIZES_SLIDER.parseData(data);
 
+  const _$ = {
+    isDraggable: false,
+    startPosition: null,
+    currentRight: null,
+    distance: 0,
+  };
+
   // Styles
   setStyles(canvas, SIZES_SLIDER);
   // draw
@@ -44,12 +51,6 @@ function sliderChart({ canvas, ctx }, data) {
   const root = document.querySelector('[data-el="slider"]');
 
   try {
-    let isDraggable = false;
-    let startPosition; // Место, откуда начали
-    let distance = 0;
-    let currentRight = undefined;
-    //isDraggable - зажата ли клавиша мыши
-
     // DOM-els
     const DOM_ELS = {
       left: root.querySelector('[data-el="left"]'),
@@ -57,37 +58,76 @@ function sliderChart({ canvas, ctx }, data) {
       right: root.querySelector('[data-el="right"]'),
     };
 
-    setPosition(DOM_ELS, 0, 120);
+    const state = {
+      rightPos: 150,
+      rightArrowWidth: 50,
+    };
 
-    window.addEventListener("mousedown", () => {
-      const { clientX, target } = event;
-      currentRight = DOM_ELS.window.style.right;
-      startPosition = clientX;
-      isDraggable = true;
+    setP();
+    function setP() {
+      css(DOM_ELS.left, {
+        right: `${state.rightPos}px`,
+      });
 
-      if (target === DOM_ELS.window) {
-        window.addEventListener("mousemove", mousemoveSlider);
-      }
-    });
+      css(DOM_ELS.window, {
+        width: `${state.rightPos - state.rightArrowWidth}px`,
+        right: `${state.rightArrowWidth}px`,
+      });
 
-    window.addEventListener("mouseup", (event) => {
-      const { clientX, target } = event;
-      isDraggable = false;
-
-      window.removeEventListener("mousemove", mousemoveSlider);
-    });
-
-    function mousemoveSlider(event) {
-      const { clientX, target } = event;
-
-      distance = clientX - startPosition;
-
-      if (currentRight) {
-        const result = Number(currentRight.replace("px", "")) - distance;
-        const w = Math.round(DOM_ELS.window.getBoundingClientRect().width);
-        setPosition(DOM_ELS, result, w);
-      }
+      css(DOM_ELS.right, {
+        width: `${state.rightArrowWidth}px`,
+      });
     }
+    // Установка значения по умолчанию
+
+    DOM_ELS.left
+      .querySelector('[data-el="left"][data-type="arrow"]')
+      .addEventListener("mousedown", (event) => {
+        const { currentTarget, clientX } = event;
+
+        // TODO - получить значения на момент клика и работать с ними
+
+        _$.isDraggable = true;
+        _$.startPosition = clientX;
+
+        state.rightPos = Number(DOM_ELS.left.style.right.replace("px", ""));
+        state.rightArrowWidth = Math.round(
+          DOM_ELS.right.getBoundingClientRect().width
+        );
+        window.addEventListener("mousemove", mouseMoveLeftArrow);
+      });
+
+    window.addEventListener("mouseup", function (event) {
+      if (_$.isDraggable) {
+        _$.isDraggable = false;
+        window.removeEventListener("mousemove", mouseMoveLeftArrow);
+      }
+    });
+
+    function mouseMoveLeftArrow(event) {
+      const { clientX } = event;
+
+      _$.distance = clientX - _$.startPosition;
+      let resultLeft = state.rightPos - _$.distance;
+
+      if (resultLeft >= SIZES_SLIDER.width) {
+        resultLeft = SIZES_SLIDER.width;
+      }
+
+      if (resultLeft <= state.rightArrowWidth) {
+        resultLeft = state.rightArrowWidth;
+      }
+
+      css(DOM_ELS.left, {
+        right: `${resultLeft}px`,
+      });
+
+      css(DOM_ELS.window, {
+        width: `${resultLeft - state.rightArrowWidth}px`,
+      });
+    }
+
+    // //////////////////////////
   } catch (error) {
     console.error(error);
   }
