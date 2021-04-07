@@ -1,4 +1,4 @@
-import { SIZES } from "./Sizes";
+import { SIZES, SIZES_SLIDER } from "./Sizes";
 
 function toDate(timestamp) {
   const shortMonth = [
@@ -65,14 +65,21 @@ function textWithMaxLenght(textArr) {
   return maxLenghtText;
 }
 
-function setPosition({ left, window, right }, rightPos) {
-  const w = 150;
+function setPosition({ left, window, right }, rightPos, windowElWidth) {
+  if (rightPos < 0) {
+    return;
+  }
+
+  if (SIZES_SLIDER.width - windowElWidth < rightPos) {
+    return;
+  }
+
   // Меняем позицию элементов в слайдере
   css(left, {
-    right: `${rightPos + w}px`,
+    right: `${rightPos + windowElWidth}px`,
   });
   css(window, {
-    width: `${w}px`,
+    width: `${windowElWidth}px`,
     right: `${rightPos}px`,
   });
   css(right, {

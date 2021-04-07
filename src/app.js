@@ -57,35 +57,37 @@ function sliderChart({ canvas, ctx }, data) {
       right: root.querySelector('[data-el="right"]'),
     };
 
-    setPosition(DOM_ELS, 100);
+    setPosition(DOM_ELS, 0, 120);
 
     window.addEventListener("mousedown", () => {
-      const { clientX } = event;
-      currentRight = DOM_ELS.window.style.right
+      const { clientX, target } = event;
+      currentRight = DOM_ELS.window.style.right;
       startPosition = clientX;
       isDraggable = true;
-    });
 
-    window.addEventListener("mouseup", ({ clientX }) => {
-      isDraggable = false;
-    });
-
-    window.addEventListener("mousemove", (event) => {
-      if (!isDraggable) {
-        return;
+      if (target === DOM_ELS.window) {
+        window.addEventListener("mousemove", mousemoveSlider);
       }
+    });
 
+    window.addEventListener("mouseup", (event) => {
+      const { clientX, target } = event;
+      isDraggable = false;
+
+      window.removeEventListener("mousemove", mousemoveSlider);
+    });
+
+    function mousemoveSlider(event) {
       const { clientX, target } = event;
 
       distance = clientX - startPosition;
 
-      if (currentRight && target === DOM_ELS.window) {
+      if (currentRight) {
         const result = Number(currentRight.replace("px", "")) - distance;
-        console.log('right', currentRight);
-        console.log('distance', distance);
-        setPosition(DOM_ELS, result);
+        const w = Math.round(DOM_ELS.window.getBoundingClientRect().width);
+        setPosition(DOM_ELS, result, w);
       }
-    });
+    }
   } catch (error) {
     console.error(error);
   }
