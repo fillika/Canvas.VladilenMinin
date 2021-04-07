@@ -108,7 +108,7 @@ function drawCircle(ctx, { coords, color }) {
 
 // tooltip
 // TODO Текст должен быть массивом строк
-function drawTooltip(ctx, text, startX, startY, angle) {
+function drawTooltip(ctx, text, startX1, startY, angle) {
   const textHeight = 14;
   const height = textHeight + text.length * textHeight;
 
@@ -116,6 +116,8 @@ function drawTooltip(ctx, text, startX, startY, angle) {
   ctx.font = `normal ${textHeight}px Helvetica, sans-serif`;
   const width =
     Math.round(ctx.measureText(textWithMaxLenght(text)).width) + textHeight;
+
+  const startX = SIZES.totalWidth - width;
 
   ctx.strokeStyle = "#333";
   ctx.lineWidth = 2;
@@ -160,7 +162,7 @@ function draw(ctx) {
 }
 
 function isDrawTooltip(ctx, proxy) {
-  const {mouseCoords} = proxy;
+  const { mouseCoords } = proxy;
 
   for (let index = 0; index < SIZES.xLine.length; index++) {
     const resultX = index * SIZES.xRatio;
@@ -173,7 +175,7 @@ function isDrawTooltip(ctx, proxy) {
           "Second text for example? Olololololol",
           "Third text for you",
         ],
-        mouseCoords.x,
+        mouseCoords.x, // Пока что координата не работает
         25,
         10
       );
