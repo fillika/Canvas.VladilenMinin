@@ -4,7 +4,7 @@
   "description": "Canvas training from VM",
   "main": "data.js",
   "scripts": {
-    "serve": "parcel ./src/index.html -p 5500",
+    "serve": "parcel ./src/index.html -p 5500 --open",
     "build": "parcel build ./src/index.html"
   },
   "repository": {
