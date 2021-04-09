@@ -73,6 +73,35 @@ function resizeSlider() {
     });
   }
 
+  function mouseMoveWindow(event) {
+    const { clientX } = event;
+
+    _$.distance = clientX - _$.startPosition;
+
+    console.log(state.rightPos - _$.distance);
+    console.log( SIZES_SLIDER.totalWidth);
+
+    if (state.rightPos - _$.distance >= SIZES_SLIDER.width) {
+      return
+    }
+
+    if (state.rightArrowWidth - _$.distance <= 0) {
+      return
+    }
+
+    css(DOM_ELS.left, {
+      right: `${state.rightPos - _$.distance}px`,
+    });
+
+    css(DOM_ELS.window, {
+      right: `${state.rightArrowWidth - _$.distance}px`,
+    });
+
+    css(DOM_ELS.right, {
+      width: `${state.rightArrowWidth - _$.distance}px`,
+    });
+  }
+
   DOM_ELS.left
     .querySelector('[data-el="left"][data-type="arrow"]')
     .addEventListener("mousedown", (event) => {
@@ -96,17 +125,24 @@ function resizeSlider() {
       _$.isDraggable = true;
       _$.startPosition = clientX;
 
-      state.rightArrowWidth = Math.round(
-        DOM_ELS.right.getBoundingClientRect().width
-      );
       window.addEventListener("mousemove", mouseMoveRightArrow);
     });
+
+  DOM_ELS.window.addEventListener("mousedown", (event) => {
+    const { clientX } = event;
+
+    _$.isDraggable = true;
+    _$.startPosition = clientX;
+
+    window.addEventListener("mousemove", mouseMoveWindow);
+  });
 
   window.addEventListener("mouseup", function (event) {
     if (_$.isDraggable) {
       _$.isDraggable = false;
       window.removeEventListener("mousemove", mouseMoveLeftArrow);
       window.removeEventListener("mousemove", mouseMoveRightArrow);
+      window.removeEventListener("mousemove", mouseMoveWindow);
 
       state.rightPos = Number(DOM_ELS.left.style.right.replace("px", ""));
       state.rightArrowWidth = DOM_ELS.right.getBoundingClientRect().width;
@@ -114,10 +150,10 @@ function resizeSlider() {
     }
   });
 
-  setP(DOM_ELS, state);
+  setDefaultPosition(DOM_ELS, state);
 }
 
-function setP(DOM_ELS, state) {
+function setDefaultPosition(DOM_ELS, state) {
   css(DOM_ELS.left, {
     right: `${state.rightPos}px`,
   });
